@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Part {
+  part_id            Int      @id @default(autoincrement())
+  name               String
+  description        String?
+  brand              String?
+  category_id        Int
+  subcategory_id     Int
+  seller_id          Int
+  price              Decimal
+  stock_quantity     Int
+  condition          String?
+  manufacturing_year Int?
+  shipping_cost      Decimal?
+  is_promoted        Boolean  @default(false)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @default(now())
+
+  // Relations
+  category    Category    @relation(fields: [category_id], references: [category_id])
+  subcategory Subcategory @relation(fields: [subcategory_id], references: [subcategory_id])
+}
+
+model Category {
+  category_id Int      @id @default(autoincrement())
+  name        String
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+
+  // Relations
+  subcategories Subcategory[]
+  parts         Part[]
+}
+
+model Subcategory {
+  subcategory_id Int      @id @default(autoincrement())
+  name           String
+  description    String?
+  category_id    Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @default(now())
+
+  // Relations
+  category Category @relation(fields: [category_id], references: [category_id])
+  parts    Part[]
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  username      String
+  conversations Conversation[] @relation("ConversationsOnUser") // Remove references: [id]
+
+  sentMessages     Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageRecipient")
+}
+
+model Conversation {
+  id       Int       @id @default(autoincrement())
+  users    User[]    @relation("ConversationsOnUser")
+  messages Message[] @relation("MessageToConversation")
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversation   Conversation @relation("MessageToConversation", fields: [conversationId], references: [id])
+  conversationId Int
+  sender         User         @relation("MessageSender", fields: [senderId], references: [id])
+  senderId       Int
+  recipient      User         @relation("MessageRecipient", fields: [recipientId], references: [id])
+  recipientId    Int
+  content        String
+  timestamp      DateTime     @default(now())
+  deleted        Boolean
+}

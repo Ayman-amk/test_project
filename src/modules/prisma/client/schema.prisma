@@ -1,0 +1,58 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Part {
+  part_id            Int      @id @default(autoincrement())
+  name               String
+  description        String?
+  brand              String?
+  category_id        Int
+  subcategory_id     Int
+  seller_id          Int
+  price              Decimal
+  stock_quantity     Int
+  condition          String?
+  manufacturing_year Int?
+  shipping_cost      Decimal?
+  is_promoted        Boolean  @default(false)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @default(now())
+
+  // Relations
+  category    Category    @relation(fields: [category_id], references: [category_id])
+  subcategory Subcategory @relation(fields: [subcategory_id], references: [subcategory_id])
+}
+
+model Category {
+  category_id Int      @id @default(autoincrement())
+  name        String
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+
+  // Relations
+  subcategories Subcategory[]
+  parts         Part[]
+}
+
+model Subcategory {
+  subcategory_id Int      @id @default(autoincrement())
+  name           String
+  description    String?
+  category_id    Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @default(now())
+
+  // Relations
+  category Category @relation(fields: [category_id], references: [category_id])
+  parts    Part[]
+}

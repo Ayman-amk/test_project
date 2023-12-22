@@ -1,0 +1,26 @@
+version: '4'
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: projetweb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - '12345:5432'
+    networks:
+      - app-network
+
+  app:
+    build: .
+    command: npm run start:dev
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
